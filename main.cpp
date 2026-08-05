@@ -89,8 +89,23 @@ int main(int argc, char **argv) {
     }
   };
 
+  long long reads_seen = 0;
+  const long long PROGRESS_INTERVAL = 1000000;
+
+  std::cout << "# Alignment file: " << config.bam << '\n';
+  std::cout << "# Window size: " << window_size
+            << " (final bin in contigs may be truncated)\n";
+  std::cout << "# Minimum mapping quality: " << min_mapq << '\n';
+  std::cout << "# DEPTH=Number of mapped bases within a window, divided by "
+               "window width (adjustment made for narrower bins at ends of "
+               "contigs).\n";
   std::cout << "CHROM\tSTART\tEND\tDEPTH\n";
   while (sam_read1(fp, hdr, b) >= 0) {
+    ++reads_seen;
+    if (reads_seen % PROGRESS_INTERVAL == 0) {
+      std::cerr << "processed " << reads_seen << " reads. Current contig = "
+                << sam_hdr_tid2name(hdr, b->core.tid) << '\r' << std::flush;
+    }
     if (b->core.flag &
         (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY | BAM_FDUP)) {
       continue;
@@ -142,6 +157,7 @@ int main(int argc, char **argv) {
       }
     }
   }
+  std::cerr << '\n';
   for (int cur = cur_tid; cur < nref; ++cur) {
     flush_contig(cur);
   }
