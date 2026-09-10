@@ -15,7 +15,8 @@ struct Config {
 
 Config parse_args(int argc, char **argv) {
   Config config;
-  CLI::App app{"My CLI App"};
+  CLI::App app{"BinDepth, the bin depth calculator that tells you sequencing "
+               "depth in bins"};
 
   app.add_option("-b,--bam", config.bam, "Path to BAM file")->required();
   app.add_option("-w,--window", config.window_size,
